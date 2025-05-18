@@ -105,7 +105,7 @@ ${projectPlan.implementationSteps.map((step, index) => `${index + 1}. ${step}`).
       plan: planString,
       files,
       sandboxId: sandbox.sandboxId,
-    }
+    } 
   } catch (error) {
     console.error("Error in generateProject:", error)
     throw new Error(`Failed to generate project: ${error.message}`)

@@ -9,6 +9,7 @@ import { Loader2, Code, Play, FileCode } from "lucide-react"
 import ProjectPlan from "@/components/project-plan"
 import CodeViewer from "@/components/code-viewer"
 import ProjectPreview from "@/components/project-preview"
+import DownloadButton from "@/components/download-button"
 import { generateProject } from "@/app/actions"
 
 export default function Home() {
@@ -18,6 +19,7 @@ export default function Home() {
   const [projectFiles, setProjectFiles] = useState<{ [key: string]: string }>({})
   const [sandboxId, setSandboxId] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState("plan")
+  const [projectName, setProjectName] = useState("My Project")
 
   const handleSubmit = async () => {
     if (!prompt.trim()) return
@@ -28,6 +30,13 @@ export default function Home() {
     setSandboxId(null)
 
     try {
+      // Extract a project name from the prompt
+      const nameMatch = prompt.match(
+        /(?:create|build|make|develop)\s+(?:a|an)\s+([a-z0-9\s]+?)(?:\s+with|\s+using|\s+that|\.|$)/i,
+      )
+      const extractedName = nameMatch ? nameMatch[1].trim() : "My Project"
+      setProjectName(extractedName.charAt(0).toUpperCase() + extractedName.slice(1))
+
       const result = await generateProject(prompt)
       setProjectPlan(result.plan)
       setProjectFiles(result.files)
@@ -71,38 +80,45 @@ export default function Home() {
       </Card>
 
       {(projectPlan || isGenerating) && (
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="plan" className="flex items-center">
-              <FileCode className="mr-2 h-4 w-4" />
-              Project Plan
-            </TabsTrigger>
-            <TabsTrigger
-              value="code"
-              className="flex items-center"
-              disabled={!projectFiles || Object.keys(projectFiles).length === 0}
-            >
-              <Code className="mr-2 h-4 w-4" />
-              Code
-            </TabsTrigger>
-            <TabsTrigger value="preview" className="flex items-center" disabled={!sandboxId}>
-              <Play className="mr-2 h-4 w-4" />
-              Preview
-            </TabsTrigger>
-          </TabsList>
+        <>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-bold">{projectName}</h2>
+            {sandboxId && <DownloadButton files={projectFiles} sandboxId={sandboxId} projectName={projectName} />}
+          </div>
 
-          <TabsContent value="plan" className="mt-4">
-            <ProjectPlan plan={projectPlan} isLoading={isGenerating} />
-          </TabsContent>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="plan" className="flex items-center">
+                <FileCode className="mr-2 h-4 w-4" />
+                Project Plan
+              </TabsTrigger>
+              <TabsTrigger
+                value="code"
+                className="flex items-center"
+                disabled={!projectFiles || Object.keys(projectFiles).length === 0}
+              >
+                <Code className="mr-2 h-4 w-4" />
+                Code
+              </TabsTrigger>
+              <TabsTrigger value="preview" className="flex items-center" disabled={!sandboxId}>
+                <Play className="mr-2 h-4 w-4" />
+                Preview
+              </TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="code" className="mt-4">
-            <CodeViewer files={projectFiles} />
-          </TabsContent>
+            <TabsContent value="plan" className="mt-4">
+              <ProjectPlan plan={projectPlan} isLoading={isGenerating} />
+            </TabsContent>
 
-          <TabsContent value="preview" className="mt-4">
-            <ProjectPreview sandboxId={sandboxId} />
-          </TabsContent>
-        </Tabs>
+            <TabsContent value="code" className="mt-4">
+              <CodeViewer files={projectFiles} />
+            </TabsContent>
+
+            <TabsContent value="preview" className="mt-4">
+              <ProjectPreview sandboxId={sandboxId} />
+            </TabsContent>
+          </Tabs>
+        </>
       )}
     </main>
   )

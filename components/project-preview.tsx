@@ -2,6 +2,8 @@
 
 import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Button } from "@/components/ui/button"
+import { ExternalLink } from "lucide-react"
 import { useEffect, useState } from "react"
 
 interface ProjectPreviewProps {
@@ -9,7 +11,6 @@ interface ProjectPreviewProps {
 }
 
 export default function ProjectPreview({ sandboxId }: ProjectPreviewProps) {
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -19,19 +20,8 @@ export default function ProjectPreview({ sandboxId }: ProjectPreviewProps) {
       return
     }
 
-    setIsLoading(true)
+    setIsLoading(false)
     setError(null)
-
-    // For e2b sandbox, we need to construct the preview URL
-    try {
-      // This is the format for e2b sandbox preview URLs
-      setPreviewUrl(`https://code.e2b.dev/sandbox/${sandboxId}`)
-      setIsLoading(false)
-    } catch (err) {
-      console.error("Error setting up preview:", err)
-      setError("Failed to set up project preview")
-      setIsLoading(false)
-    }
   }, [sandboxId])
 
   if (isLoading) {
@@ -59,7 +49,7 @@ export default function ProjectPreview({ sandboxId }: ProjectPreviewProps) {
     )
   }
 
-  if (!previewUrl) {
+  if (!sandboxId) {
     return (
       <Card>
         <CardContent className="p-6 text-center text-muted-foreground">No preview available.</CardContent>
@@ -67,15 +57,22 @@ export default function ProjectPreview({ sandboxId }: ProjectPreviewProps) {
     )
   }
 
+  // Instead of embedding an iframe, provide a link to open in a new tab
   return (
     <Card>
-      <CardContent className="p-0 h-[600px]">
-        <iframe
-          src={previewUrl}
-          className="w-full h-full border-0"
-          title="Project Preview"
-          sandbox="allow-scripts allow-same-origin allow-forms"
-        />
+      <CardContent className="p-6">
+        <div className="flex flex-col items-center justify-center space-y-6">
+          <p className="text-center">
+            Due to security restrictions, the sandbox preview needs to be opened in a new tab.
+          </p>
+          <Button
+            onClick={() => window.open(`https://code.e2b.dev/sandbox/${sandboxId}`, "_blank")}
+            className="flex items-center gap-2"
+          >
+            <ExternalLink className="h-4 w-4" />
+            Open Sandbox in New Tab
+          </Button>
+        </div>
       </CardContent>
     </Card>
   )
