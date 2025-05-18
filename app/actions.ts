@@ -9,7 +9,7 @@ export async function generateProject(prompt: string) {
   try {
     // Step 1: Generate a project plan using Gemini with generateObject
     const { object: projectPlan } = await generateObject({
-      model: google("gemini-2.0-flash"),
+      model: google("gemini-2.5-flash-preview-04-17"),
       schema: projectPlanSchema,
       system: `You are an expert Next.js developer who specializes in building modern web applications.
       You have deep knowledge of React, TypeScript, and the Next.js App Router.
@@ -30,7 +30,7 @@ export async function generateProject(prompt: string) {
 
     // Step 2: Generate code based on the plan using generateObject with schema
     const { object: files } = await generateObject({
-      model: google("gemini-2.0-flash"),
+      model: google("gemini-2.5-flash-preview-04-17"),
       schema: codeFilesSchema,
       system: `You are an expert Next.js developer who specializes in building modern web applications.
       You have deep knowledge of React, TypeScript, and the Next.js App Router.
